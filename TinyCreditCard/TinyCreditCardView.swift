@@ -8,7 +8,7 @@
 
 import UIKit
 
-fileprivate extension UIScrollView {
+public extension UIScrollView {
     func scrollTo(page: Int) {
         var rect = bounds
         rect.origin.x = rect.width * CGFloat(page)
@@ -39,6 +39,7 @@ class TinyCreditCardView: UIView {
     @IBOutlet weak var expDateButton: UIButton!
     
     let cardBackView = TinyCreditCardBackView()
+    
     let focusArea = UIView()
     
     var currentPage: Int = 0 {
@@ -77,6 +78,11 @@ class TinyCreditCardView: UIView {
         scrollView.scrollTo(page: TinyCreditCardInputView.InputType.expDate.rawValue)
     }
     
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesBegan(touches, with: event)
+        scrollView.scrollTo(page: TinyCreditCardInputView.InputType.cscNumder.rawValue)
+    }
+    
 }
 
 private extension TinyCreditCardView {
@@ -113,6 +119,7 @@ private extension TinyCreditCardView {
         cardBackView.topAnchor.constraint(equalTo: cardFrontView.topAnchor).isActive = true
         cardBackView.bottomAnchor.constraint(equalTo: cardFrontView.bottomAnchor).isActive = true
         cardBackView.isHidden = true
+        cardBackView.cardFrontView = self
         
         scrollView.delegate = self
         cardNumberInputView.type = .cardNumber
@@ -183,6 +190,22 @@ extension TinyCreditCardView: UIScrollViewDelegate {
         if pageValue <= CGFloat(TinyCreditCardInputView.InputType.cardNumber.rawValue) {
             let offset: CGFloat = 20 * pageValue
             focusArea.frame = cardNumberButton.frame.insetBy(dx: offset, dy: offset)
+            
+            if cardFrontView.isHidden {
+
+                cardFrontView.layer.transform = CATransform3DIdentity
+                cardBackView.layer.transform = CATransform3DIdentity
+                let transitionOptions: UIView.AnimationOptions = [.transitionFlipFromRight, .showHideTransitionViews]
+
+                UIView.transition(with: cardContainerView, duration: 0.5, options: transitionOptions, animations: {
+                    self.cardFrontView.isHidden = false
+                    self.cardBackView.isHidden = true
+                })
+
+            }
+            let percent = pageValue.truncatingRemainder(dividingBy: 1)
+            cardBackView.updateFocusArea(progress: percent)
+            
 
         } else if pageValue < CGFloat(TinyCreditCardInputView.InputType.cardHolder.rawValue) {
             let percent = pageValue.truncatingRemainder(dividingBy: 1)

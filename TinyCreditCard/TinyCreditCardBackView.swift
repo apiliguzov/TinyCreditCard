@@ -15,6 +15,8 @@ class TinyCreditCardBackView: UIView {
     @IBOutlet weak var cscNumberLabel: UILabel!
     @IBOutlet weak var cscArea: UIView!
     
+    var cardFrontView: TinyCreditCardView! = nil
+    
     let focusArea = UIView()
 
     var cscNumber: String? {
@@ -38,6 +40,12 @@ class TinyCreditCardBackView: UIView {
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         initView()
+    }
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesBegan(touches, with: event)
+        cardFrontView.scrollView.scrollTo(page: TinyCreditCardInputView.InputType.cardNumber.rawValue)
+        cardFrontView.scrollView.contentOffset.x = 0
     }
 }
 
